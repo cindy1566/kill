@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鐵道時光軌跡｜臺灣舊車站與鐵道風華</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        railGreen: '#13281e',
+                        railGreenLight: '#1d3b2e',
+                        railGold: '#d4af37',
+                        railGoldLight: '#f4e096',
+                        railWood: '#3e2723',
+                        railPaper: '#f5f2eb',
+                        railPaperDark: '#e5dfd3',
+                        railRust: '#8b2500',
+                        railIron: '#232b2b'
+                    },
+                    fontFamily: {
+                        serif: ['Georgia', 'Cambria', 'Noto Serif TC', 'serif'],
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Anime.js Integration -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+    <!-- Custom CSS Styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&display=swap');
+
+        body {
+            font-family: 'Noto Serif TC', 'Inter', serif;
+            background-color: #0d1310;
+            color: #f5f2eb;
+            overflow-x: hidden;
+        }
+
+        /* Reading Progress Bar */
+        #readingProgress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #d4af37, #8b2500, #f4e096);
+            z-index: 100;
+            width: 0%;
+            transition: width 0.1s ease-out;
+        }
+
+        /* Ticket Stub Cutouts and Styling */
+        .ticket-card {
+            background-color: #f5f2eb;
+            color: #2b2b2b;
+            position: relative;
+            background-image: radial-gradient(#d5cebe 1px, transparent 1px);
+            background-size: 12px 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+        }
+
+        .ticket-notch-left, .ticket-notch-right {
+            position: absolute;
+            top: 50%;
+            width: 20px;
+            height: 20px;
+            background-color: #0d1310;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+        .ticket-notch-left { left: -10px; }
+        .ticket-notch-right { right: -10px; }
+
+        /* Flip Clock Box */
+        .flip-unit {
+            background: #13281e;
+            border: 2px solid #d4af37;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 4px 15px rgba(0,0,0,0.6);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        .flip-unit::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(0,0,0,0.7);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.15);
+        }
+
+        /* Train Rails Background pattern */
+        .rail-track-bg {
+            background-image: repeating-linear-gradient(90deg, #1d3b2e 0, #1d3b2e 4px, transparent 0, transparent 36px);
+        }
+
+        /* Station Image Comparison Slider */
+        .img-comp-container {
+            position: relative;
+            height: 240px;
+            overflow: hidden;
+            user-select: none;
+            background-color: #1a2420;
+        }
+        .img-comp-img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .img-comp-overlay {
+            width: 50%;
+            z-index: 2;
+            border-right: 3px solid #d4af37;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+            background-color: #121c17;
+        }
+
+        /* Interactive Map Nodes */
+        .map-node {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .map-node:hover {
+            transform: scale(1.35);
+            z-index: 30;
+        }
+
+        /* Soft Focus Glow Effect */
+        .soft-focus-glow {
+            transition: background-color 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease;
+        }
+        .soft-focus-glow.active-focus {
+            background-color: rgba(29, 59, 46, 0.75);
+            border-color: rgba(212, 175, 55, 0.8);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d1310;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1d3b2e;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
+
+        /* Modal Backdrop */
+        .modal-backdrop {
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-railGold selection:text-railGreen">
+
+    <!-- Reading Progress Bar -->
+    <div id="readingProgress"></div>
+
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-railGreen/90 backdrop-blur-md border-b border-railGold/20 px-4 py-3 transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#hero" class="flex items-center space-x-3 text-railGold hover:opacity-80 transition group">
+                <i class="fa-solid fa-train-subway text-2xl group-hover:rotate-12 transition-transform duration-300"></i>
+                <span class="font-bold tracking-widest text-lg md:text-xl">鐵道時光軌跡</span>
+            </a>
+            <div class="hidden md:flex space-x-8 text-sm tracking-wider text-railPaper/80">
+                <a href="#hero" class="hover:text-railGold transition flex items-center gap-1.5"><i class="fa-solid fa-compass text-xs"></i>首頁</a>
+                <a href="#timeline" class="hover:text-railGold transition flex items-center gap-1.5"><i class="fa-solid fa-timeline text-xs"></i>時光軸</a>
+                <a href="#map" class="hover:text-railGold transition flex items-center gap-1.5"><i class="fa-solid fa-map-marked-alt text-xs"></i>路線地圖</a>
+                <a href="#stations" class="hover:text-railGold transition flex items-center gap-1.5"><i class="fa-solid fa-place-of-worship text-xs"></i>車站圖鑑</a>
+                <a href="#people" class="hover:text-railGold transition flex items-center gap-1.5"><i class="fa-solid fa-user-group text-xs"></i>鐵道人物</a>
+                <a href="#artifacts" class="hover:text-railGold transition flex items-center gap-1.5"><i class="fa-solid fa-box-archive text-xs"></i>微物件</a>
+            </div>
+            <button id="audioToggle" class="px-3 py-1.5 rounded-full border border-railGold/40 text-railGold hover:bg-railGold hover:text-railGreen text-xs transition flex items-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+                <span id="audioText" class="hidden sm:inline">車廂環境音：開</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section id="hero" class="relative min-h-screen flex flex-col items-center justify-center pt-24 pb-16 px-4 overflow-hidden border-b border-railGold/20">
+        <!-- Hero Decorative Train Background Artwork (SVG Gradient + Steam Engine Silhouette) -->
+        <div class="absolute inset-0 z-0 flex items-center justify-center opacity-30 pointer-events-none">
+            <svg viewBox="0 0 1200 600" class="w-full h-full object-cover">
+                <defs>
+                    <linearGradient id="heroBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#1d3b2e" stop-opacity="0.8"/>
+                        <stop offset="50%" stop-color="#0d1310" stop-opacity="0.9"/>
+                        <stop offset="100%" stop-color="#3e2723" stop-opacity="0.6"/>
+                    </linearGradient>
+                </defs>
+                <rect width="1200" height="600" fill="url(#heroBgGrad)"/>
+                <!-- Steam Train Silhouette Art (Inspired by CT273) -->
+                <path d="M 150 450 L 1050 450 M 150 460 L 1050 460" stroke="#d4af37" stroke-width="4" stroke-dasharray="20,10"/>
+                <g fill="#d4af37" opacity="0.25">
+                    <rect x="300" y="250" width="400" height="170" rx="15"/>
+                    <rect x="250" y="210" width="120" height="210" rx="10"/>
+                    <circle cx="370" cy="180" r="25"/> <!-- Chimney -->
+                    <circle cx="430" cy="420" r="35" stroke="#d4af37" stroke-width="6" fill="none"/>
+                    <circle cx="520" cy="420" r="35" stroke="#d4af37" stroke-width="6" fill="none"/>
+                    <circle cx="610" cy="420" r="35" stroke="#d4af37" stroke-width="6" fill="none"/>
+                    <!-- Locomotive Front Plate Badge (CT273) -->
+                    <rect x="680" y="280" width="60" height="110" rx="5"/>
+                    <!-- Steam Clouds -->
+                    <circle cx="390" cy="130" r="45" opacity="0.3"/>
+                    <circle cx="440" cy="90" r="65" opacity="0.2"/>
+                    <circle cx="520" cy="60" r="85" opacity="0.15"/>
+                </g>
+            </svg>
+        </div>
+
+        <div class="relative z-10 max-w-4xl mx-auto text-center px-4">
+            <!-- Animated Badge -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-railGold/40 bg-railGreen/80 text-railGold text-xs md:text-sm font-semibold tracking-widest mb-6 hero-stagger shadow-lg">
+                <i class="fa-solid fa-train text-railGold"></i> 臺灣鐵道 130+ 年記憶漫遊展 • 經典蒸汽機車 CT273 尊榮巡禮
+            </div>
+
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-black tracking-widest text-railPaper mb-6 leading-tight hero-stagger">
+                縱貫百年的<span class="text-railGold relative inline-block px-2">鋼鐵軌跡
+                    <svg class="absolute left-0 -bottom-2 w-full h-3 text-railGold/60" viewBox="0 0 100 20" preserveAspectRatio="none">
+                        <path d="M0,15 Q50,0 100,15" stroke="currentColor" stroke-width="4" fill="none"/>
+                    </svg>
+                </span>
+            </h1>
+
+            <p class="text-base md:text-xl text-railPaper/80 max-w-2xl mx-auto mb-10 font-sans font-light leading-relaxed hero-stagger">
+                從 1887 年劉銘傳開鑿的第一條鐵路、CT273「仲夏寶島號」蒸汽機車，到台北機廠與山海線上的檜木老車站。領取您的硬頁車票，駛向歷史現場。
+            </p>
+
+            <!-- Flip Clock Counter -->
+            <div class="flex justify-center items-center gap-3 md:gap-8 mb-12 hero-stagger">
+                <div class="text-center">
+                    <span class="text-xs text-railGold/80 tracking-widest block mb-2 font-mono">START YEAR</span>
+                    <div class="flip-unit px-5 py-3 md:px-7 md:py-4">
+                        <span id="flipYearStart" class="text-2xl md:text-4xl font-mono font-bold text-railPaper">1887</span>
+                    </div>
+                    <span class="text-xs text-railPaper/60 mt-1.5 block font-sans">清領劉銘傳線</span>
+                </div>
+
+                <div class="text-railGold text-xl md:text-3xl animate-pulse">
+                    <i class="fa-solid fa-arrow-right-long"></i>
+                </div>
+
+                <div class="text-center">
+                    <span class="text-xs text-railGold/80 tracking-widest block mb-2 font-mono">PRESENT</span>
+                    <div class="flip-unit px-5 py-3 md:px-7 md:py-4">
+                        <span id="flipYearEnd" class="text-2xl md:text-4xl font-mono font-bold text-railGold">2026</span>
+                    </div>
+                    <span class="text-xs text-railPaper/60 mt-1.5 block font-sans">文化永續與創生</span>
+                </div>
+            </div>
+
+            <!-- Interactive Ticket CTA Button -->
+            <div class="hero-stagger inline-block">
+                <button id="ctaTicketBtn" class="ticket-card px-8 py-4 rounded-lg flex items-center gap-5 border-2 border-railGold hover:border-railGoldLight active:scale-95 group cursor-pointer">
+                    <div class="ticket-notch-left"></div>
+                    <div class="ticket-notch-right"></div>
+                    <div class="text-left pr-5 border-r border-dashed border-railWood/40">
+                        <div class="text-[10px] text-railWood/70 uppercase tracking-widest font-mono font-bold">PASSENGER TICKET</div>
+                        <div class="text-lg md:text-xl font-bold text-railWood tracking-wider">領取車票 • 開啟時光之旅</div>
+                    </div>
+                    <div class="text-railRust text-2xl group-hover:rotate-12 transition-transform duration-300">
+                        <i class="fa-solid fa-ticket"></i>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Animated Scroll Down Prompt -->
+        <a href="#timeline" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-railGold/70 hover:text-railGold flex flex-col items-center text-xs tracking-widest transition">
+            <span>向下滑動開啟軌跡</span>
+            <i class="fa-solid fa-chevron-down mt-2 animate-bounce"></i>
+        </a>
+    </section>
+
+    <!-- SECTION 2: CHRONOLOGICAL TIMELINE -->
+    <section id="timeline" class="py-24 px-4 relative max-w-6xl mx-auto border-b border-railGold/20">
+        <div class="text-center mb-16 section-header">
+            <span class="text-railGold text-xs font-bold tracking-widest uppercase block mb-2 font-mono">CHRONOLOGY</span>
+            <h2 class="text-3xl md:text-5xl font-extrabold text-railPaper">縱貫時光軸</h2>
+            <p class="text-railPaper/70 text-sm md:text-base mt-3 max-w-xl mx-auto font-sans">
+                捲動頁面觀看列車駛過歲月，動態進度條與歷史事件將隨火車抵達同步顯現。
+            </p>
+        </div>
+
+        <!-- Train Rails Animated Track -->
+        <div class="relative mb-20 px-2">
+            <div class="h-4 bg-railWood/90 rounded-full relative overflow-hidden border border-railGold/40 shadow-inner">
+                <div id="railProgress" class="h-full bg-gradient-to-r from-railGold via-railRust to-railGoldLight w-0 transition-all duration-200"></div>
+                <div class="absolute inset-0 rail-track-bg opacity-40"></div>
+            </div>
+            <!-- Moving Train Icon -->
+            <div id="movingTrain" class="absolute top-1/2 -translate-y-1/2 left-0 text-railGold text-2xl md:text-3xl transition-all duration-200 z-10 filter drop-shadow-[0_2px_8px_rgba(212,175,55,0.8)]">
+                <i class="fa-solid fa-train"></i>
+            </div>
+        </div>
+
+        <!-- Timeline Events List -->
+        <div class="space-y-16 md:space-y-24 relative before:absolute before:inset-0 before:left-1/2 before:-translate-x-1/2 before:w-0.5 before:bg-railGold/30 before:z-0">
+
+            <!-- Timeline Item 1: 清領時代 (CT273 蒸汽機車特別意象) -->
+            <div class="timeline-item soft-focus-glow relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center p-6 rounded-2xl border border-railGold/20 bg-railGreen/40 transition-all">
+                <div class="md:text-right space-y-3">
+                    <span class="inline-block px-3 py-1 bg-railRust text-railPaper text-xs font-bold rounded font-mono">1887 – 1895</span>
+                    <h3 class="text-2xl font-bold text-railGold">清領起步與蒸汽女王 CT273 傳奇</h3>
+                    <p class="text-railPaper/80 text-sm font-sans leading-relaxed">
+                        巡撫劉銘傳奏請興建臺灣鐵路，引進「騰雲號」。後續發展出的 CT273 型蒸汽機車（被譽為「蒸汽機車女王」），更成為臺灣鐵路高速運載與工業發展的經典象徵。
+                    </p>
+                    <div class="pt-2 text-xs text-railGold/80 font-mono"><i class="fa-solid fa-location-dot mr-1"></i>基隆獅球嶺隧道 • 台北大稻埕車站 • 彰化扇形車庫</div>
+                </div>
+                <!-- Dynamic SVG Art Asset (CT273 Steam Locomotive Focus) -->
+                <div class="flex justify-center overflow-hidden rounded-xl shadow-2xl border border-railGold/30 bg-railGreenLight/60 p-4">
+                    <svg viewBox="0 0 400 240" class="w-full h-auto max-h-56">
+                        <rect width="400" height="240" fill="#17261f" rx="10"/>
+                        <!-- Locomotive Workshop Frame -->
+                        <path d="M 20 220 L 380 220 M 40 220 L 40 40 L 360 40 L 360 220" stroke="#d4af37" stroke-width="2" fill="none" opacity="0.4"/>
+                        <!-- CT273 Engine Body -->
+                        <rect x="80" y="90" width="220" height="90" fill="#2b2b2b" rx="8"/>
+                        <rect x="60" y="70" width="60" height="110" fill="#1f1f1f" rx="5"/>
+                        <circle cx="280" cy="110" r="22" fill="#d4af37"/> <!-- Headlight Glow -->
+                        <circle cx="280" cy="110" r="12" fill="#fff"/>
+                        <!-- CT273 Red Badge -->
+                        <rect x="250" y="135" width="45" height="18" fill="#8b2500" rx="3"/>
+                        <text x="272" y="148" fill="#f5f2eb" font-size="10" font-weight="bold" text-anchor="middle" font-family="monospace">CT273</text>
+                        <!-- Wheels & Steam -->
+                        <circle cx="110" cy="185" r="24" stroke="#d4af37" stroke-width="4" fill="#13281e"/>
+                        <circle cx="170" cy="185" r="24" stroke="#d4af37" stroke-width="4" fill="#13281e"/>
+                        <circle cx="230" cy="185" r="24" stroke="#d4af37" stroke-width="4" fill="#13281e"/>
+                        <path d="M 280 90 Q 300 60 330 50 Q 360 40 380 60" stroke="#f5f2eb" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.3"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Timeline Item 2: 日治黃金期 -->
+            <div class="timeline-item soft-focus-glow relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center p-6 rounded-2xl border border-railGold/20 bg-railGreen/40 transition-all">
+                <div class="order-2 md:order-1 flex justify-center overflow-hidden rounded-xl shadow-2xl border border-railGold/30 bg-railGreenLight/60 p-4">
+                    <svg viewBox="0 0 400 240" class="w-full h-auto max-h-56">
+                        <rect width="400" height="240" fill="#1c2822" rx="10"/>
+                        <!-- Classic Wooden Station Elevation -->
+                        <polygon points="200,40 60,110 340,110" fill="#3e2723"/>
+                        <rect x="80" y="110" width="240" height="100" fill="#d4af37" opacity="0.8"/>
+                        <!-- Pillars and Windows -->
+                        <rect x="110" y="130" width="30" height="80" fill="#13281e"/>
+                        <rect x="185" y="130" width="30" height="80" fill="#13281e"/>
+                        <rect x="260" y="130" width="30" height="80" fill="#13281e"/>
+                        <circle cx="200" cy="80" r="14" fill="#8b2500"/>
+                        <text x="200" y="84" fill="#f5f2eb" font-size="9" text-anchor="middle" font-weight="bold">勝興</text>
+                    </svg>
+                </div>
+                <div class="order-1 md:order-2 space-y-3">
+                    <span class="inline-block px-3 py-1 bg-railGold text-railGreen font-bold text-xs rounded font-mono">1895 – 1945</span>
+                    <h3 class="text-2xl font-bold text-railGold">日治黃金期：縱貫貫通與木造工藝</h3>
+                    <p class="text-railPaper/80 text-sm font-sans leading-relaxed">
+                        1908 年臺灣縱貫鐵路全線貫通。舊山線地形險峻，誕生勝興車站、魚藤坪斷橋（龍騰斷橋）等工藝奇蹟，全台亦興起檜木造車站與和洋折衷建築風潮。
+                    </p>
+                    <div class="pt-2 text-xs text-railGold/80 font-mono"><i class="fa-solid fa-location-dot mr-1"></i>舊山線勝興車站 • 新竹車站</div>
+                </div>
+            </div>
+
+            <!-- Timeline Item 3: 台北機廠與電氣化榮景 -->
+            <div class="timeline-item soft-focus-glow relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center p-6 rounded-2xl border border-railGold/20 bg-railGreen/40 transition-all">
+                <div class="md:text-right space-y-3">
+                    <span class="inline-block px-3 py-1 bg-railRust text-railPaper text-xs font-bold rounded font-mono">1945 – 1980s</span>
+                    <h3 class="text-2xl font-bold text-railGold">戰後榮景：台北機廠與鐵路電氣化</h3>
+                    <p class="text-railPaper/80 text-sm font-sans leading-relaxed">
+                        1935年建立的台北機廠（Taipei Railway Workshop）作為臺灣鐵路修護的心臟重鎮，保養無數自強號、莒光號與藍皮解憂號。1970 年代電氣化更開啟現代運輸新紀元。
+                    </p>
+                    <div class="pt-2 text-xs text-railGold/80 font-mono"><i class="fa-solid fa-location-dot mr-1"></i>國家鐵道博物館（台北機廠） • 彰化扇形車庫</div>
+                </div>
+                <div class="flex justify-center overflow-hidden rounded-xl shadow-2xl border border-railGold/30 bg-railGreenLight/60 p-4">
+                    <!-- Taipei Railway Workshop SVG Art -->
+                    <svg viewBox="0 0 400 240" class="w-full h-auto max-h-56">
+                        <rect width="400" height="240" fill="#17221c" rx="10"/>
+                        <!-- Industrial Steel Truss Roof Structure (Taipei Workshop) -->
+                        <path d="M 30 180 L 200 60 L 370 180 M 30 180 L 370 180" stroke="#d4af37" stroke-width="3" fill="none"/>
+                        <path d="M 80 145 L 80 180 M 130 110 L 130 180 M 180 75 L 180 180 M 230 83 L 230 180 M 280 118 L 280 180 M 320 145 L 320 180" stroke="#d4af37" stroke-width="1.5" stroke-dasharray="4,2"/>
+                        <!-- Three Classic Passenger Train Cars Inside Workshop -->
+                        <!-- Orange Chu-Kuang / EMU -->
+                        <rect x="50" y="130" width="85" height="60" fill="#e67e22" rx="4"/>
+                        <rect x="60" y="140" width="18" height="20" fill="#333"/>
+                        <rect x="85" y="140" width="18" height="20" fill="#333"/>
+                        <!-- Yellow/Orange Tze-Chiang -->
+                        <rect x="155" y="120" width="90" height="70" fill="#d4af37" rx="4"/>
+                        <rect x="165" y="130" width="20" height="25" fill="#13281e"/>
+                        <rect x="195" y="130" width="20" height="25" fill="#13281e"/>
+                        <!-- Classic Blue Ordinary Train Car -->
+                        <rect x="265" y="135" width="85" height="55" fill="#2980b9" rx="4"/>
+                        <rect x="275" y="145" width="18" height="20" fill="#fff" opacity="0.8"/>
+                        <rect x="300" y="145" width="18" height="20" fill="#fff" opacity="0.8"/>
+                        <text x="200" y="220" fill="#d4af37" font-size="11" text-anchor="middle" font-family="sans-serif">台北機廠 (Taipei Railway Workshop) 經典典藏</text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Timeline Item 4: 文化保存 -->
+            <div class="timeline-item soft-focus-glow relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center p-6 rounded-2xl border border-railGold/20 bg-railGreen/40 transition-all">
+                <div class="order-2 md:order-1 flex justify-center overflow-hidden rounded-xl shadow-2xl border border-railGold/30 bg-railGreenLight/60 p-4">
+                    <svg viewBox="0 0 400 240" class="w-full h-auto max-h-56">
+                        <rect width="400" height="240" fill="#14211a" rx="10"/>
+                        <circle cx="200" cy="120" r="70" fill="none" stroke="#d4af37" stroke-width="2" stroke-dasharray="6,4"/>
+                        <path d="M 130 120 C 130 80, 270 80, 270 120 C 270 160, 130 160, 130 120 Z" fill="none" stroke="#8b2500" stroke-width="3"/>
+                        <text x="200" y="125" fill="#f4e096" font-size="14" text-anchor="middle" font-weight="bold">鐵道文化資產活化</text>
+                    </svg>
+                </div>
+                <div class="order-1 md:order-2 space-y-3">
+                    <span class="inline-block px-3 py-1 bg-railGold text-railGreen font-bold text-xs rounded font-mono">2000s – 至今</span>
+                    <h3 class="text-2xl font-bold text-railGold">文化保存：舊線復甦與永續展演</h3>
+                    <p class="text-railPaper/80 text-sm font-sans leading-relaxed">
+                        舊車站轉型為文化園區與鐵道藝術館，響應永續發展目標（SDG 11 永續城鄉與文化遺產保存）。舊山線鐵道自行車與蒸氣火車復駛，讓古蹟風華煥發新生。
+                    </p>
+                    <div class="pt-2 text-xs text-railGold/80 font-mono"><i class="fa-solid fa-location-dot mr-1"></i>舊臺中車站文化園區 • 阿里山林鐵</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 3: INTERACTIVE ROUTE MAP -->
+    <section id="map" class="py-24 px-4 bg-railGreen/30 border-b border-railGold/20">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 section-header">
+                <span class="text-railGold text-xs font-bold tracking-widest uppercase block mb-2 font-mono">INTERACTIVE MAP</span>
+                <h2 class="text-3xl md:text-5xl font-extrabold text-railPaper">臺灣鐵道互動路線圖</h2>
+                <p class="text-railPaper/70 text-sm md:text-base mt-3 max-w-xl mx-auto font-sans">
+                    點擊路線站點，探索縱貫線、山海線、台北機廠與阿里山林鐵代表性站點。
+                </p>
+            </div>
+
+            <!-- SVG Stylized Taiwan Railway Map Container -->
+            <div class="bg-railGreen/60 border border-railGold/30 rounded-2xl p-6 md:p-10 relative overflow-hidden shadow-2xl backdrop-blur-md">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                    
+                    <!-- SVG Interactive Route Map Diagram -->
+                    <div class="lg:col-span-2 relative min-h-[380px] flex items-center justify-center bg-railIron/40 rounded-xl p-4 border border-railGold/10">
+                        <svg viewBox="0 0 600 400" class="w-full h-auto max-h-[420px]" id="railwaySvgMap">
+                            <!-- Western Trunk Line North -->
+                            <path d="M 450,40 L 410,70 L 360,100 L 310,140" stroke="#d4af37" stroke-width="4" fill="none" stroke-dasharray="8,4"/>
+                            <!-- Mountain Line (Inner Loop) -->
+                            <path d="M 310,140 Q 280,180 270,220 T 260,280" stroke="#8b2500" stroke-width="4" fill="none"/>
+                            <!-- Coastal Line (Outer Loop) -->
+                            <path d="M 310,140 Q 240,170 230,220 T 260,280" stroke="#f4e096" stroke-width="3" stroke-dasharray="4,4" fill="none"/>
+                            <!-- Western Trunk Line South -->
+                            <path d="M 260,280 L 220,330 L 170,370" stroke="#d4af37" stroke-width="4" fill="none" stroke-dasharray="8,4"/>
+                            <!-- Alishan Forest Railway Branch -->
+                            <path d="M 220,330 L 290,340 L 340,320" stroke="#2e6f40" stroke-width="3" fill="none"/>
+
+                            <!-- Interactive Map Nodes -->
+                            <g class="map-node cursor-pointer" data-station="keelung">
+                                <circle cx="450" cy="40" r="8" fill="#d4af37" stroke="#0d1310" stroke-width="2"/>
+                                <text x="462" y="44" fill="#f5f2eb" font-size="12" font-weight="bold">基隆</text>
+                            </g>
+                            <g class="map-node cursor-pointer" data-station="taipei">
+                                <circle cx="410" cy="70" r="10" fill="#8b2500" stroke="#d4af37" stroke-width="2"/>
+                                <text x="425" y="74" fill="#f4e096" font-size="12" font-weight="bold">臺北機廠 / 臺北車站</text>
+                            </g>
+                            <g class="map-node cursor-pointer" data-station="hsinchu">
+                                <circle cx="360" cy="100" r="9" fill="#d4af37" stroke="#0d1310" stroke-width="2"/>
+                                <text x="372" y="104" fill="#f5f2eb" font-size="12" font-weight="bold">新竹</text>
+                            </g>
+                            <g class="map-node cursor-pointer" data-station="shengxing">
+                                <circle cx="280" cy="180" r="10" fill="#8b2500" stroke="#d4af37" stroke-width="2"/>
+                                <text x="295" y="184" fill="#f4e096" font-size="13" font-weight="bold">勝興（舊山線）</text>
+                            </g>
+                            <g class="map-node cursor-pointer" data-station="taichung">
+                                <circle cx="270" cy="220" r="10" fill="#d4af37" stroke="#0d1310" stroke-width="2"/>
+                                <text x="285" y="224" fill="#f5f2eb" font-size="13" font-weight="bold">舊臺中車站</text>
+                            </g>
+                            <g class="map-node cursor-pointer" data-station="chiayi">
+                                <circle cx="220" cy="330" r="9" fill="#d4af37" stroke="#0d1310" stroke-width="2"/>
+                                <text x="175" y="334" fill="#f5f2eb" font-size="12" font-weight="bold">嘉義</text>
+                            </g>
+                            <g class="map-node cursor-pointer" data-station="fenqihu">
+                                <circle cx="290" cy="340" r="9" fill="#2e6f40" stroke="#d4af37" stroke-width="2"/>
+                                <text x="302" y="344" fill="#f5f2eb" font-size="12" font-weight="bold">奮起湖（林鐵）</text>
+                            </g>
+                            <g class="map-node cursor-pointer" data-station="baoan">
+                                <circle cx="170" cy="370" r="8" fill="#d4af37" stroke="#0d1310" stroke-width="2"/>
+                                <text x="120" y="374" fill="#f5f2eb" font-size="12" font-weight="bold">保安/永康</text>
+                            </g>
+                        </svg>
+                        
+                        <!-- Map Legend -->
+                        <div class="absolute bottom-3 left-3 bg-railGreen/90 p-2.5 rounded-lg border border-railGold/20 text-[11px] font-sans space-y-1">
+                            <div class="flex items-center gap-2"><span class="w-3 h-1 bg-railGold rounded"></span> 縱貫鐵路幹線</div>
+                            <div class="flex items-center gap-2"><span class="w-3 h-1 bg-railRust rounded"></span> 舊山線陡坡段 / 台北機廠</div>
+                            <div class="flex items-center gap-2"><span class="w-3 h-1 bg-[#2e6f40] rounded"></span> 阿里山森林鐵路</div>
+                        </div>
+                    </div>
+
+                    <!-- Map Selected Station Detail Card Info -->
+                    <div class="bg-railGreen/80 p-6 rounded-xl border border-railGold/30 flex flex-col justify-between h-full min-h-[340px]" id="mapDetailBox">
+                        <div>
+                            <span class="text-xs px-2.5 py-1 bg-railGold/20 text-railGold font-mono rounded border border-railGold/30" id="mapCardTag">點擊地圖站點探索</span>
+                            <h3 class="text-2xl font-bold text-railGold mt-3 mb-2" id="mapCardTitle">勝興車站</h3>
+                            <p class="text-xs text-railPaper/60 font-mono mb-4" id="mapCardLoc"><i class="fa-solid fa-location-dot mr-1"></i>苗栗縣三義鄉</p>
+                            
+                            <!-- SVG Card Banner Graphic Dynamic Display -->
+                            <div class="w-full h-36 rounded-lg mb-4 border border-railGold/20 overflow-hidden bg-railGreenLight/90 flex items-center justify-center p-2" id="mapCardVisual">
+                                <svg viewBox="0 0 300 120" class="w-full h-full">
+                                    <rect width="300" height="120" fill="#1b2a22"/>
+                                    <circle cx="150" cy="60" r="40" fill="#d4af37" opacity="0.2"/>
+                                    <path d="M 50 100 L 250 100 M 50 105 L 250 105" stroke="#d4af37" stroke-width="2"/>
+                                    <text x="150" y="65" fill="#f5f2eb" font-size="14" font-weight="bold" text-anchor="middle">鐵道文化地標</text>
+                                </svg>
+                            </div>
+                            
+                            <p class="text-railPaper/80 text-sm font-sans leading-relaxed" id="mapCardDesc">
+                                點擊地圖上的站點節點，可在此預覽該車站與鐵道園區的建築風格、歷史地位與地理特徵。
+                            </p>
+                        </div>
+                        <a href="#stations" class="mt-4 text-center py-2 bg-railGold text-railGreen text-xs font-bold rounded-lg hover:bg-railGoldLight transition">查看舊車站圖鑑全貌</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: STATION CATALOG & COMPARISON -->
+    <section id="stations" class="py-24 px-4 border-b border-railGold/20 max-w-7xl mx-auto">
+        <div class="text-center mb-16 section-header">
+            <span class="text-railGold text-xs font-bold tracking-widest uppercase block mb-2 font-mono">ARCHITECTURAL HERITAGE</span>
+            <h2 class="text-3xl md:text-5xl font-extrabold text-railPaper">特色舊車站與鐵道園區圖鑑</h2>
+            <p class="text-railPaper/70 text-sm md:text-base mt-3 max-w-xl mx-auto font-sans">
+                拖動對比滑塊，探索舊車站與鐵道修護重鎮（Taipei Railway Workshop）今昔風貌與結構細節。
+            </p>
+
+            <!-- Filter Categories -->
+            <div class="flex flex-wrap justify-center gap-2.5 mt-8">
+                <button class="station-filter active-filter px-5 py-2 rounded-full border border-railGold bg-railGold text-railGreen text-xs font-bold transition cursor-pointer" data-filter="all">全部車站與園區</button>
+                <button class="station-filter px-5 py-2 rounded-full border border-railGold/40 hover:border-railGold bg-railGreen/60 text-railPaper text-xs font-bold transition cursor-pointer" data-filter="wooden">全木造古蹟車站</button>
+                <button class="station-filter px-5 py-2 rounded-full border border-railGold/40 hover:border-railGold bg-railGreen/60 text-railPaper text-xs font-bold transition cursor-pointer" data-filter="hybrid">和洋折衷/洋樓車站</button>
+                <button class="station-filter px-5 py-2 rounded-full border border-railGold/40 hover:border-railGold bg-railGreen/60 text-railPaper text-xs font-bold transition cursor-pointer" data-filter="industrial">修護廠區/林鐵小站</button>
+            </div>
+        </div>
+
+        <!-- Station Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="stationGrid">
+
+            <!-- Card 1: 國家鐵道博物館 (台北機廠 Taipei Railway Workshop) -->
+            <div class="station-card bg-railGreen/40 border border-railGold/30 rounded-2xl overflow-hidden shadow-xl hover:border-railGold transition-all duration-300 flex flex-col justify-between" data-category="industrial">
+                <div>
+                    <div class="img-comp-container relative">
+                        <!-- Modern Present -->
+                        <div class="img-comp-img bg-railGreenLight">
+                            <svg viewBox="0 0 400 240" class="w-full h-full">
+                                <rect width="400" height="240" fill="#172820"/>
+                                <path d="M 40 180 L 200 60 L 360 180 Z" stroke="#d4af37" stroke-width="3" fill="none"/>
+                                <rect x="130" y="110" width="140" height="70" fill="#d4af37" rx="5"/>
+                                <text x="200" y="150" fill="#13281e" font-size="14" font-weight="bold" text-anchor="middle">Taipei Railway Workshop</text>
+                            </svg>
+                            <span class="absolute top-3 right-3 bg-railGreen/80 text-railGold text-[10px] px-2 py-0.5 rounded font-mono border border-railGold/30">國家鐵道博物館</span>
+                        </div>
+                        <!-- Historical Overlay Image -->
+                        <div class="img-comp-img img-comp-overlay">
+                            <svg viewBox="0 0 400 240" class="w-full h-full">
+                                <rect width="400" height="240" fill="#2b251e"/>
+                                <path d="M 40 180 L 200 60 L 360 180 Z" stroke="#8b2500" stroke-width="3" fill="none"/>
+                                <rect x="90" y="120" width="80" height="60" fill="#8b2500" rx="3"/>
+                                <text x="130" y="155" fill="#f5f2eb" font-size="12" font-weight="bold" text-anchor="middle">1935 創建廠區</text>
+                            </svg>
+                            <span class="absolute top-3 left-3 bg-railRust/90 text-railPaper text-[10px] px-2 py-0.5 rounded font-mono">台北機廠歷史</span>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold text-railGold">台北機廠 (Taipei Workshop)</h3>
+                            <span class="text-xs px-2.5 py-1 bg-railRust/90 text-railPaper rounded border border-railGold/30 font-mono">修護廠區/國家博物館</span>
+                        </div>
+                        <p class="text-xs text-railPaper/60 mb-4 font-mono"><i class="fa-solid fa-location-dot mr-1"></i>臺北市信義區 • 鐵道車輛總醫院</p>
+                        <p class="text-railPaper/80 text-sm font-sans mb-6 leading-relaxed">
+                            建於1935年，為臺灣歷史最悠久的大型火車修護廠。擁有獨特的大跨距鋼桁架組裝工場與員工澡堂，現已轉型為國家鐵道博物館展演園區。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="px-6 pb-6">
+                    <button class="open-modal-btn w-full py-2.5 rounded-lg border border-railGold/40 hover:bg-railGold hover:text-railGreen text-xs font-bold tracking-wider text-railGold transition flex items-center justify-center gap-2 cursor-pointer"
+                            data-title="台北機廠 (Taipei Railway Workshop)"
+                            data-type="修護廠區/國家博物館"
+                            data-location="臺北市信義區"
+                            data-desc="台北機廠完工於1935年，佔地廣大，被譽為臺灣鐵路的『車輛總醫院』。廠區內擁有客車工場、柴電工場、鍛冶工場及著名利用蒸氣餘熱的澡堂。現正轉型為『國家鐵道博物館』，典藏包含CT273、藍皮客車與各世代電聯車，為臺灣鐵道工業遺產最重要地標。">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i> 查看廠區詳情與修護歷史
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 2: 勝興車站 -->
+            <div class="station-card bg-railGreen/40 border border-railGold/30 rounded-2xl overflow-hidden shadow-xl hover:border-railGold transition-all duration-300 flex flex-col justify-between" data-category="wooden">
+                <div>
+                    <div class="img-comp-container relative">
+                        <div class="img-comp-img bg-railGreenLight">
+                            <svg viewBox="0 0 400 240" class="w-full h-full">
+                                <rect width="400" height="240" fill="#1a2e24"/>
+                                <polygon points="200,50 80,110 320,110" fill="#3e2723"/>
+                                <rect x="100" y="110" width="200" height="90" fill="#d4af37"/>
+                                <text x="200" y="160" fill="#13281e" font-size="16" font-weight="bold" text-anchor="middle">勝興車站 現代觀光</text>
+                            </svg>
+                            <span class="absolute top-3 right-3 bg-railGreen/80 text-railGold text-[10px] px-2 py-0.5 rounded font-mono border border-railGold/30">現代現況</span>
+                        </div>
+                        <div class="img-comp-img img-comp-overlay">
+                            <svg viewBox="0 0 400 240" class="w-full h-full">
+                                <rect width="400" height="240" fill="#2b231a"/>
+                                <polygon points="200,50 80,110 320,110" fill="#22140e"/>
+                                <rect x="100" y="110" width="200" height="90" fill="#8b2500"/>
+                                <text x="200" y="160" fill="#f5f2eb" font-size="16" font-weight="bold" text-anchor="middle">1906年 十六份驛</text>
+                            </svg>
+                            <span class="absolute top-3 left-3 bg-railRust/90 text-railPaper text-[10px] px-2 py-0.5 rounded font-mono">昔日歷史</span>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold text-railGold">勝興車站</h3>
+                            <span class="text-xs px-2.5 py-1 bg-railWood text-railPaper rounded border border-railGold/30 font-mono">全木造古蹟</span>
+                        </div>
+                        <p class="text-xs text-railPaper/60 mb-4 font-mono"><i class="fa-solid fa-location-dot mr-1"></i>苗栗縣三義鄉 • 西部鐵路最高點</p>
+                        <p class="text-railPaper/80 text-sm font-sans mb-6 leading-relaxed">
+                            興建於1906年，全站皆以優質檜木榫接建成，未用一根鐵釘。位於西部縱貫鐵路最高點（海拔402.326公尺），柱頭飾有避邪八卦圖騰。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="px-6 pb-6">
+                    <button class="open-modal-btn w-full py-2.5 rounded-lg border border-railGold/40 hover:bg-railGold hover:text-railGreen text-xs font-bold tracking-wider text-railGold transition flex items-center justify-center gap-2 cursor-pointer"
+                            data-title="勝興車站"
+                            data-type="全木造古蹟車站"
+                            data-location="苗栗縣三義鄉"
+                            data-desc="勝興車站建於日治時期（1906年），原名十六份驛。站體完全採用臺灣優質檜木，並以精湛的傳統榫接工藝打造。因位於地形崎嶇的舊山線，站體屋簷與柱頭設計特別融合了八卦破煞寓意。現為體驗鐵道文化與 Rail Bike 的最熱門景點。">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i> 查看車站詳情與建築結構
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 3: 舊臺中車站 -->
+            <div class="station-card bg-railGreen/40 border border-railGold/30 rounded-2xl overflow-hidden shadow-xl hover:border-railGold transition-all duration-300 flex flex-col justify-between" data-category="hybrid">
+                <div>
+                    <div class="img-comp-container relative">
+                        <div class="img-comp-img bg-railGreenLight">
+                            <svg viewBox="0 0 400 240" class="w-full h-full">
+                                <rect width="400" height="240" fill="#1e2c24"/>
+                                <rect x="120" y="80" width="160" height="120" fill="#8b2500" rx="4"/>
+                                <polygon points="200,30 170,80 230,80" fill="#d4af37"/>
+                                <text x="200" y="140" fill="#f5f2eb" font-size="14" font-weight="bold" text-anchor="middle">臺中驛 辰野樣式</text>
+                            </svg>
+                            <span class="absolute top-3 right-3 bg-railGreen/80 text-railGold text-[10px] px-2 py-0.5 rounded font-mono border border-railGold/30">現代展區</span>
+                        </div>
+                        <div class="img-comp-img img-comp-overlay">
+                            <svg viewBox="0 0 400 240" class="w-full h-full">
+                                <rect width="400" height="240" fill="#2b2319"/>
+                                <rect x="120" y="80" width="160" height="120" fill="#5c1900" rx="4"/>
+                                <polygon points="200,30 170,80 230,80" fill="#9e8023"/>
+                                <text x="200" y="140" fill="#f5f2eb" font-size="14" font-weight="bold" text-anchor="middle">1917年 落成典禮</text>
+                            </svg>
+                            <span class="absolute top-3 left-3 bg-railRust/90 text-railPaper text-[10px] px-2 py-0.5 rounded font-mono">日治時代</span>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold text-railGold">舊臺中車站</h3>
+                            <span class="text-xs px-2.5 py-1 bg-railRust/90 text-railPaper rounded border border-railGold/30 font-mono">和洋折衷洋樓</span>
+                        </div>
+                        <p class="text-xs text-railPaper/60 mb-4 font-mono"><i class="fa-solid fa-location-dot mr-1"></i>臺中市中區 • 辰野式樣典範</p>
+                        <p class="text-railPaper/80 text-sm font-sans mb-6 leading-relaxed">
+                            1917年完工，採後期文藝復興風格（俗稱辰野式樣）。紅磚造牆體配上白色洗石子帶飾，中央鐘塔宏偉氣派，為台灣鐵路樞紐地標。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="px-6 pb-6">
+                    <button class="open-modal-btn w-full py-2.5 rounded-lg border border-railGold/40 hover:bg-railGold hover:text-railGreen text-xs font-bold tracking-wider text-railGold transition flex items-center justify-center gap-2 cursor-pointer"
+                            data-title="舊臺中車站"
+                            data-type="和洋折衷/洋樓車站"
+                            data-location="臺中市中區"
+                            data-desc="舊臺中車站第二代站體完工於1917年，是日治時期台灣縱貫鐵路上最華麗的車站之一。建築受英國維多利亞風格與日本辰野金吾建築風格影響，主體為紅磚飾以白色洗石子帶條，屋頂採用山牆與尖塔。現已活化為台中鐵道文化園區。">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i> 查看車站詳情與建築結構
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 4: 阿里山林鐵奮起湖站 -->
+            <div class="station-card bg-railGreen/40 border border-railGold/30 rounded-2xl overflow-hidden shadow-xl hover:border-railGold transition-all duration-300 flex flex-col justify-between" data-category="industrial">
+                <div>
+                    <div class="img-comp-container relative">
+                        <div class="img-comp-img bg-railGreenLight">
+                            <svg viewBox="0 0 400 240" class="w-full h-full">
+                                <rect width="400" height="240" fill="#182c1f"/>
+                                <path d="M 50 160 L 350 160" stroke="#2e6f40" stroke-width="6"/>
+                                <rect x="140" y="90" width="120" height="70" fill="#3e2723" rx="4"/>
+                                <text x="200" y="130" fill="#d4af37" font-size="14" font-weight="bold" text-anchor="middle">奮起湖 山城便當</text>
+                            </svg>
+                            <span class="absolute top-3 right-3 bg-railGreen/80 text-railGold text-[10px] px-2 py-0.5 rounded font-mono border border-railGold/30">高山山城</span>
+                        </div>
+                        <div class="img-comp-img img-comp-overlay">
+                            <svg viewBox="0 0 400 240" class="w-full h-full">
+                                <rect width="400" height="240" fill="#24281e"/>
+                                <path d="M 50 160 L 350 160" stroke="#8b2500" stroke-width="6"/>
+                                <rect x="140" y="90" width="120" height="70" fill="#1a140e" rx="4"/>
+                                <text x="200" y="130" fill="#f5f2eb" font-size="14" font-weight="bold" text-anchor="middle">伐木中繼站</text>
+                            </svg>
+                            <span class="absolute top-3 left-3 bg-railRust/90 text-railPaper text-[10px] px-2 py-0.5 rounded font-mono">伐木黃金期</span>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold text-railGold">奮起湖車站</h3>
+                            <span class="text-xs px-2.5 py-1 bg-railGreenLight text-railPaper rounded border border-railGold/30 font-mono">修護廠區/林鐵小站</span>
+                        </div>
+                        <p class="text-xs text-railPaper/60 mb-4 font-mono"><i class="fa-solid fa-location-dot mr-1"></i>嘉義縣竹崎鄉 • 阿里山森林鐵路</p>
+                        <p class="text-railPaper/80 text-sm font-sans mb-6 leading-relaxed">
+                            阿里山森林鐵路的黃金中繼站，早期為木材運輸與機車頭加水加煤整備要塞，發展出盛極一時的鐵路便當文化與山城聚落風貌。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="px-6 pb-6">
+                    <button class="open-modal-btn w-full py-2.5 rounded-lg border border-railGold/40 hover:bg-railGold hover:text-railGreen text-xs font-bold tracking-wider text-railGold transition flex items-center justify-center gap-2 cursor-pointer"
+                            data-title="奮起湖車站"
+                            data-type="產業/林鐵小站"
+                            data-location="嘉義縣竹崎鄉"
+                            data-desc="奮起湖車站海拔1,403公尺，是阿里山森林鐵路沿線最大的中途站。早年登山蒸汽火車在此加水、補充煤炭，並更換機車頭，因行車時間長，乘客在此停靠用餐，進而孕育出馳名的奮起湖鐵路便當。">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i> 查看車站詳情與建築結構
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 5: 新竹車站 -->
+            <div class="station-card bg-railGreen/40 border border-railGold/30 rounded-2xl overflow-hidden shadow-xl hover:border-railGold transition-all duration-300 flex flex-col justify-between" data-category="hybrid">
+                <div>
+                    <div class="img-comp-container relative">
+                        <div class="img-comp-img bg-railGreenLight">
+                            <svg viewBox="0 0 400 240" class="w-full h-full">
+                                <rect width="400" height="240" fill="#1b2923"/>
+                                <rect x="150" y="60" width="100" height="140" fill="#d4af37" rx="4"/>
+                                <polygon points="200,20 170,60 230,60" fill="#8b2500"/>
+                                <text x="200" y="120" fill="#13281e" font-size="14" font-weight="bold" text-anchor="middle">新竹驛 現役國定古蹟</text>
+                            </svg>
+                            <span class="absolute top-3 right-3 bg-railGreen/80 text-railGold text-[10px] px-2 py-0.5 rounded font-mono border border-railGold/30">全台現存最古老</span>
+                        </div>
+                        <div class="img-comp-img img-comp-overlay">
+                            <svg viewBox="0 0 400 240" class="w-full h-full">
+                                <rect width="400" height="240" fill="#28221b"/>
+                                <rect x="150" y="60" width="100" height="140" fill="#7a6018" rx="4"/>
+                                <polygon points="200,20 170,60 230,60" fill="#541600"/>
+                                <text x="200" y="120" fill="#f5f2eb" font-size="14" font-weight="bold" text-anchor="middle">1913年 落成</text>
+                            </svg>
+                            <span class="absolute top-3 left-3 bg-railRust/90 text-railPaper text-[10px] px-2 py-0.5 rounded font-mono">歷史風華</span>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold text-railGold">新竹車站</h3>
+                            <span class="text-xs px-2.5 py-1 bg-railRust/90 text-railPaper rounded border border-railGold/30 font-mono">巴洛克和洋風</span>
+                        </div>
+                        <p class="text-xs text-railPaper/60 mb-4 font-mono"><i class="fa-solid fa-location-dot mr-1"></i>新竹市東區 • 國定古蹟</p>
+                        <p class="text-railPaper/80 text-sm font-sans mb-6 leading-relaxed">
+                            完工於1913年，為台灣現存歷史最悠久且仍在運作的火車站。結合哥德式陡峭屋頂與巴洛克裝飾，鐘樓氣派宏偉。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="px-6 pb-6">
+                    <button class="open-modal-btn w-full py-2.5 rounded-lg border border-railGold/40 hover:bg-railGold hover:text-railGreen text-xs font-bold tracking-wider text-railGold transition flex items-center justify-center gap-2 cursor-pointer"
+                            data-title="新竹車站"
+                            data-type="和洋折衷/洋樓車站"
+                            data-location="新竹市東區"
+                            data-desc="新竹車站由松崎萬長設計，1913年落成。這座國定古蹟混合了德國哥德式與巴洛克建築風格，中央的鐘塔與急傾斜的大屋頂成為新竹都市景觀地標。">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i> 查看車站詳情與建築結構
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 6: 保安車站 -->
+            <div class="station-card bg-railGreen/40 border border-railGold/30 rounded-2xl overflow-hidden shadow-xl hover:border-railGold transition-all duration-300 flex flex-col justify-between" data-category="wooden">
+                <div>
+                    <div class="img-comp-container relative">
+                        <div class="img-comp-img bg-railGreenLight">
+                            <svg viewBox="0 0 400 240" class="w-full h-full">
+                                <rect width="400" height="240" fill="#18271e"/>
+                                <rect x="110" y="90" width="180" height="80" fill="#3e2723" rx="4"/>
+                                <text x="200" y="135" fill="#d4af37" font-size="16" font-weight="bold" text-anchor="middle">保安車站 永保安康</text>
+                            </svg>
+                            <span class="absolute top-3 right-3 bg-railGreen/80 text-railGold text-[10px] px-2 py-0.5 rounded font-mono border border-railGold/30">永保安康</span>
+                        </div>
+                        <div class="img-comp-img img-comp-overlay">
+                            <svg viewBox="0 0 400 240" class="w-full h-full">
+                                <rect width="400" height="240" fill="#24211a"/>
+                                <rect x="110" y="90" width="180" height="80" fill="#261715" rx="4"/>
+                                <text x="200" y="135" fill="#f5f2eb" font-size="16" font-weight="bold" text-anchor="middle">日式檜木車站</text>
+                            </svg>
+                            <span class="absolute top-3 left-3 bg-railRust/90 text-railPaper text-[10px] px-2 py-0.5 rounded font-mono">日式檜木</span>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold text-railGold">保安車站</h3>
+                            <span class="text-xs px-2.5 py-1 bg-railWood text-railPaper rounded border border-railGold/30 font-mono">全木造古蹟</span>
+                        </div>
+                        <p class="text-xs text-railPaper/60 mb-4 font-mono"><i class="fa-solid fa-location-dot mr-1"></i>臺南市仁德區 • 吉祥車票發源地</p>
+                        <p class="text-railPaper/80 text-sm font-sans mb-6 leading-relaxed">
+                            採用阿里山優質檜木構建的日式木造車站，典雅樸實。與永康車站連成的「永保安康」紀念車票風靡一時。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="px-6 pb-6">
+                    <button class="open-modal-btn w-full py-2.5 rounded-lg border border-railGold/40 hover:bg-railGold hover:text-railGreen text-xs font-bold tracking-wider text-railGold transition flex items-center justify-center gap-2 cursor-pointer"
+                            data-title="保安車站"
+                            data-type="全木造古蹟車站"
+                            data-location="臺南市仁德區"
+                            data-desc="保安車站原名『車路墘驛』，建於1899年，後於1914年遷至現址重建。整座站房全部以阿里山檜木建造，結構維持極佳。因與鄰近的永康車站形成『永保安康』吉祥語連號硬質車票，吸引無數旅客造訪。">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i> 查看車站詳情與建築結構
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 5: HISTORICAL PEOPLE & PROTAGONISTS -->
+    <section id="people" class="py-24 px-4 bg-railGreen/20 border-b border-railGold/20">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 section-header">
+                <span class="text-railGold text-xs font-bold tracking-widest uppercase block mb-2 font-mono">PEOPLE & STORIES</span>
+                <h2 class="text-3xl md:text-5xl font-extrabold text-railPaper">鐵道靈魂人物專區</h2>
+                <p class="text-railPaper/70 text-sm md:text-base mt-3 max-w-xl mx-auto font-sans">
+                    縱貫線與機廠背後，是由工程師、巡撫、老司機與修護職人用汗水譜寫的傳奇。
+                </p>
+            </div>
+
+            <!-- People Grid Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+                <!-- Person 1 -->
+                <div class="people-card bg-railGreen/50 border border-railGold/30 rounded-2xl p-6 relative overflow-hidden shadow-xl hover:border-railGold transition-all">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-16 h-16 rounded-full bg-railGold/20 border-2 border-railGold flex items-center justify-center text-railGold text-2xl">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-railGold">劉銘傳</h3>
+                            <span class="text-xs text-railPaper/60 font-mono">清領首任臺灣巡撫</span>
+                        </div>
+                    </div>
+                    <p class="text-railPaper/80 text-sm font-sans leading-relaxed mb-4">
+                        1887 年克服萬難奏請鋪設鐵路，採買「騰雲號」與「御風號」蒸汽機車，開鑿基隆獅球嶺隧道，為臺灣鐵路奠定首條基石。
+                    </p>
+                    <div class="text-xs text-railGold/80 font-mono border-t border-railGold/20 pt-3">
+                        <i class="fa-solid fa-quote-left mr-1"></i>「興建鐵線，為臺灣富強之本。」
+                    </div>
+                </div>
+
+                <!-- Person 2 -->
+                <div class="people-card bg-railGreen/50 border border-railGold/30 rounded-2xl p-6 relative overflow-hidden shadow-xl hover:border-railGold transition-all">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-16 h-16 rounded-full bg-railRust/30 border-2 border-railGold flex items-center justify-center text-railGold text-2xl">
+                            <i class="fa-solid fa-compass-drafting"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-railGold">長谷川謹介</h3>
+                            <span class="text-xs text-railPaper/60 font-mono">臺灣縱貫鐵路之父</span>
+                        </div>
+                    </div>
+                    <p class="text-railPaper/80 text-sm font-sans leading-relaxed mb-4">
+                        規劃縱貫鐵路全線貫通工程，克服舊山線斷崖與高山險峻地形，主持魚藤坪鐵橋與九座隧道建設，實現南北 9 小時通航夢想。
+                    </p>
+                    <div class="text-xs text-railGold/80 font-mono border-t border-railGold/20 pt-3">
+                        <i class="fa-solid fa-quote-left mr-1"></i>「速成延長主義，突破地形極限。」
+                    </div>
+                </div>
+
+                <!-- Person 3: CT273 蒸汽機車司機與台北機廠職人 -->
+                <div class="people-card bg-railGreen/50 border border-railGold/30 rounded-2xl p-6 relative overflow-hidden shadow-xl hover:border-railGold transition-all">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-16 h-16 rounded-full bg-railGreenLight border-2 border-railGold flex items-center justify-center text-railGold text-2xl">
+                            <i class="fa-solid fa-wrench"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-railGold">CT273 司機與修護職人</h3>
+                            <span class="text-xs text-railPaper/60 font-mono">台北機廠與蒸汽火車守護者</span>
+                        </div>
+                    </div>
+                    <p class="text-railPaper/80 text-sm font-sans leading-relaxed mb-4">
+                        駕駛 CT273 蒸汽火車的司領員與台北機廠（Taipei Workshop）的匠人師傅，幾十年如一日敲打鋼輪與維護高壓鍋爐，讓文化資產順利復駛。
+                    </p>
+                    <div class="text-xs text-railGold/80 font-mono border-t border-railGold/20 pt-3">
+                        <i class="fa-solid fa-quote-left mr-1"></i>「聲聲汽笛，守護鋼鐵工藝靈魂。」
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 6: RAIL ARTIFACTS SHOWCASE -->
+    <section id="artifacts" class="py-24 px-4 max-w-6xl mx-auto border-b border-railGold/20">
+        <div class="text-center mb-16 section-header">
+            <span class="text-railGold text-xs font-bold tracking-widest uppercase block mb-2 font-mono">MEMORIES & ARTIFACTS</span>
+            <h2 class="text-3xl md:text-5xl font-extrabold text-railPaper">鐵道微物件展覽館</h2>
+            <p class="text-railPaper/70 text-sm md:text-base mt-3 max-w-xl mx-auto font-sans">
+                點擊物件卡片，窺見硬頁車票的金屬壓痕與鐵道庶民生活細節。
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+            <!-- Artifact 1: 硬頁追分成功車票 -->
+            <div class="artifact-card ticket-card p-6 rounded-xl border-2 border-railWood flex flex-col justify-between h-72 cursor-pointer relative overflow-hidden" data-artifact="ticket">
+                <div>
+                    <div class="flex justify-between items-center border-b border-dashed border-railWood/30 pb-2 mb-3">
+                        <span class="text-[10px] font-mono text-railWood/70">臺灣鐵路局</span>
+                        <span class="text-[10px] font-mono font-bold text-railRust">特快吉祥簽</span>
+                    </div>
+                    <div class="text-center my-4">
+                        <div class="text-2xl font-black text-railWood tracking-widest">追分 ➔ 成功</div>
+                        <div class="text-[11px] text-railWood/60 font-mono mt-1">CHUI-FEN to CHENG-KUNG</div>
+                        <div class="text-xs font-bold text-railRust mt-3 bg-railPaperDark/80 py-1.5 rounded inline-block px-3">祝：金榜題名</div>
+                    </div>
+                </div>
+                <div class="border-t border-dashed border-railWood/30 pt-2 flex justify-between items-center text-[10px] font-mono text-railWood/70">
+                    <span>限當日有效</span>
+                    <span>NT$ 15.00</span>
+                </div>
+            </div>
+
+            <!-- Artifact 2: 永保安康車票 -->
+            <div class="artifact-card ticket-card p-6 rounded-xl border-2 border-railWood flex flex-col justify-between h-72 cursor-pointer relative overflow-hidden" data-artifact="ticket2">
+                <div>
+                    <div class="flex justify-between items-center border-b border-dashed border-railWood/30 pb-2 mb-3">
+                        <span class="text-[10px] font-mono text-railWood/70">臺灣鐵路局</span>
+                        <span class="text-[10px] font-mono font-bold text-railRust">紀念硬票</span>
+                    </div>
+                    <div class="text-center my-4">
+                        <div class="text-2xl font-black text-railWood tracking-widest">永康 ➔ 保安</div>
+                        <div class="text-[11px] text-railWood/60 font-mono mt-1">YONG-KANG to BAO-AN</div>
+                        <div class="text-xs font-bold text-railRust mt-3 bg-railPaperDark/80 py-1.5 rounded inline-block px-3">吉祥語：永保安康</div>
+                    </div>
+                </div>
+                <div class="border-t border-dashed border-railWood/30 pt-2 flex justify-between items-center text-[10px] font-mono text-railWood/70">
+                    <span>平成吉祥紀念</span>
+                    <span>NT$ 20.00</span>
+                </div>
+            </div>
+
+            <!-- Artifact 3: 不鏽鋼便當 -->
+            <div class="artifact-card bg-railGreen/40 border border-railGold/30 p-6 rounded-xl flex flex-col justify-between h-72 cursor-pointer hover:border-railGold transition group" data-artifact="bento">
+                <div>
+                    <div class="w-12 h-12 rounded-full bg-railGold/20 text-railGold flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition duration-300">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-railGold mb-2">懷舊鐵盒排骨便當</h3>
+                    <p class="text-railPaper/70 text-xs font-sans leading-relaxed">
+                        雙層圓形不鏽鋼便當盒，印有台鐵工字軌圖騰。滷排骨與酸菜是世代臺灣人的味覺記憶。
+                    </p>
+                </div>
+                <span class="text-xs text-railGold hover:underline flex items-center gap-1 font-mono">展開故事 <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+
+            <!-- Artifact 4: CT273 蒸汽機車銘牌與吊扇 -->
+            <div class="artifact-card bg-railGreen/40 border border-railGold/30 p-6 rounded-xl flex flex-col justify-between h-72 cursor-pointer hover:border-railGold transition group" data-artifact="ct273badge">
+                <div>
+                    <div class="w-12 h-12 rounded-full bg-railRust/30 text-railGold flex items-center justify-center text-2xl mb-4 group-hover:rotate-12 transition duration-500">
+                        <i class="fa-solid fa-stamp"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-railGold mb-2">CT273 機車車號銅牌</h3>
+                    <p class="text-railPaper/70 text-xs font-sans leading-relaxed">
+                        鑄造著 CT273 字樣的紅底金字金屬牌，代表著日治至今鐵道機械工藝的極致結晶。
+                    </p>
+                </div>
+                <span class="text-xs text-railGold hover:underline flex items-center gap-1 font-mono">展開故事 <i class="fa-solid fa-arrow-right"></i></span>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-12 px-4 text-center border-t border-railGold/20 bg-railGreen/50 text-railPaper/60 text-xs font-sans">
+        <div class="max-w-4xl mx-auto space-y-4">
+            <div class="flex justify-center items-center gap-2 text-railGold font-bold text-base">
+                <i class="fa-solid fa-train"></i> 臺灣鐵道、CT273與台北機廠文化數位展覽
+            </div>
+            <p>本網站專為文化保存與數位體驗設計 | 響應 SDG 11 永續城鄉與區域文化遺產保存</p>
+            <p class="text-[10px] text-railPaper/40 font-mono">© 2026 Taiwan Railway History & Culture Archive. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- STATION MODAL DIALOG -->
+    <div id="stationModal" class="fixed inset-0 z-50 hidden modal-backdrop bg-black/80 flex items-center justify-center p-4">
+        <div class="bg-railGreen border-2 border-railGold/60 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 relative shadow-2xl opacity-0 transition-all duration-300" id="modalContainer">
+            <button id="closeModalBtn" class="absolute top-4 right-4 text-railPaper/60 hover:text-railGold text-2xl transition cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div class="w-full h-48 rounded-xl mb-6 border border-railGold/30 bg-railGreenLight flex items-center justify-center p-4 overflow-hidden" id="modalImgContainer">
+                <svg viewBox="0 0 400 200" class="w-full h-full">
+                    <rect width="400" height="200" fill="#1b2a22"/>
+                    <circle cx="200" cy="100" r="60" fill="#d4af37" opacity="0.3"/>
+                    <text x="200" y="105" fill="#f5f2eb" font-size="18" font-weight="bold" text-anchor="middle" id="modalSvgText">臺灣鐵道遺產</text>
+                </svg>
+            </div>
+
+            <span id="modalType" class="px-3 py-1 bg-railGold text-railGreen font-bold text-xs rounded inline-block mb-3 font-mono"></span>
+            <h3 id="modalTitle" class="text-2xl md:text-3xl font-extrabold text-railGold mb-2"></h3>
+            <p id="modalLocation" class="text-xs text-railPaper/60 font-mono mb-4"><i class="fa-solid fa-location-dot mr-1"></i><span></span></p>
+            <div id="modalDesc" class="text-railPaper/80 text-sm font-sans leading-relaxed space-y-3 border-t border-railGold/20 pt-4"></div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT ANIMATIONS & LOGIC -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. ENTRANCE ANIMATIONS (Anime.js) ---
+            // Hero Stagger Animation
+            anime({
+                targets: '.hero-stagger',
+                translateY: [40, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(180, {start: 200}),
+                duration: 1200,
+                easing: 'easeOutExpo'
+            });
+
+            // Hero Flip Clock Counting Effect
+            const startYearObj = { val: 1800 };
+            anime({
+                targets: startYearObj,
+                val: 1887,
+                round: 1,
+                duration: 2200,
+                easing: 'easeInOutExpo',
+                update: () => {
+                    document.getElementById('flipYearStart').innerText = startYearObj.val;
+                }
+            });
+
+            // Ticket 3D Tilt Hover Animation Setup
+            const ticketBtn = document.getElementById('ctaTicketBtn');
+            ticketBtn.addEventListener('mousemove', (e) => {
+                const rect = ticketBtn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                anime({
+                    targets: ticketBtn,
+                    rotateX: -y * 0.15,
+                    rotateY: x * 0.15,
+                    duration: 300,
+                    easing: 'easeOutQuad'
+                });
+            });
+            ticketBtn.addEventListener('mouseleave', () => {
+                anime({
+                    targets: ticketBtn,
+                    rotateX: 0,
+                    rotateY: 0,
+                    duration: 600,
+                    easing: 'easeOutElastic(1, .5)'
+                });
+            });
+
+            // Smooth Scroll on CTA
+            ticketBtn.addEventListener('click', () => {
+                document.getElementById('timeline').scrollIntoView({ behavior: 'smooth' });
+            });
+
+            // --- 2. SCROLL TRIGGERED ANIMATIONS & READING PROGRESS ---
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            const railProgress = document.getElementById('railProgress');
+            const movingTrain = document.getElementById('movingTrain');
+            const progressBar = document.getElementById('readingProgress');
+
+            function handleScroll() {
+                const scrollPos = window.scrollY;
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                
+                // Top Reading Progress
+                const readPercentage = (scrollPos / Math.max(docHeight, 1)) * 100;
+                progressBar.style.width = Math.min(readPercentage, 100) + '%';
+
+                // Timeline Track Train Movement
+                const timelineSec = document.getElementById('timeline');
+                const rect = timelineSec.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+
+                if (rect.top < windowHeight && rect.bottom > 0) {
+                    const totalHeight = rect.height;
+                    const progress = Math.min(Math.max((windowHeight - rect.top) / totalHeight, 0), 1);
+                    const percentage = progress * 100;
+                    
+                    railProgress.style.width = percentage + '%';
+                    movingTrain.style.left = `calc(${Math.min(percentage, 96)}%)`;
+                }
+
+                // Smooth Fade in and Soft Focus Highlight for Timeline Items
+                timelineItems.forEach((item) => {
+                    const itemRect = item.getBoundingClientRect();
+                    // Entrance animation
+                    if (itemRect.top < windowHeight * 0.85 && !item.classList.contains('animated')) {
+                        item.classList.add('animated');
+                        anime({
+                            targets: item,
+                            translateY: [50, 0],
+                            opacity: [0, 1],
+                            duration: 900,
+                            easing: 'easeOutCubic'
+                        });
+                    }
+
+                    // Soft focus highlight reading helper
+                    if (itemRect.top < windowHeight * 0.55 && itemRect.bottom > windowHeight * 0.25) {
+                        item.classList.add('active-focus');
+                    } else {
+                        item.classList.remove('active-focus');
+                    }
+                });
+
+                // Section Headers Animation Trigger
+                document.querySelectorAll('.section-header').forEach(header => {
+                    const hRect = header.getBoundingClientRect();
+                    if(hRect.top < windowHeight * 0.85 && !header.classList.contains('animated')) {
+                        header.classList.add('animated');
+                        anime({
+                            targets: header,
+                            translateY: [30, 0],
+                            opacity: [0, 1],
+                            duration: 800,
+                            easing: 'easeOutQuad'
+                        });
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', handleScroll);
+            handleScroll(); // Initial check
+
+            // --- 3. INTERACTIVE MAP DATA & NODE CLICK ---
+            const stationData = {
+                keelung: {
+                    title: "基隆車站與獅球嶺隧道",
+                    tag: "縱貫線起點",
+                    loc: "基隆市仁愛區",
+                    desc: "劉銘傳鐵路起點，擁全台首座鐵路隧道『獅球嶺隧道』，見證清領蒸汽機車騰雲號通車輝輝煌。"
+                },
+                taipei: {
+                    title: "臺北機廠 (Taipei Railway Workshop)",
+                    tag: "鐵道修護心臟 / 國家鐵道博物館",
+                    loc: "臺北市信義區",
+                    desc: "1935年建立的車輛修護總醫院，典藏 CT273 蒸汽機車與各世代客車車廂，為台灣鐵道工業文化核心保存地。"
+                },
+                hsinchu: {
+                    title: "新竹車站",
+                    tag: "巴洛克和洋風古蹟",
+                    loc: "新竹市東區",
+                    desc: "完工於1913年，為台灣現存歷史最悠久且運作中的國定古蹟車站，鐘塔巍峨。"
+                },
+                shengxing: {
+                    title: "勝興車站（舊山線）",
+                    tag: "全木造工藝絕響",
+                    loc: "苗栗縣三義鄉",
+                    desc: "位於西部縱貫鐵路最高點（海拔402公尺），全站以檜木榫接建成，未用一根鐵釘。"
+                },
+                taichung: {
+                    title: "舊臺中車站",
+                    tag: "辰野式樣典範",
+                    loc: "臺中市中區",
+                    desc: "1917年落成，紅磚搭配白色洗石子水平帶飾，現活化為臺中鐵道文化園區。"
+                },
+                chiayi: {
+                    title: "嘉義車站",
+                    tag: "木業與林鐵樞紐",
+                    loc: "嘉義市西區",
+                    desc: "縱貫鐵路與阿里山森林鐵路的交會門戶，展現林業極盛時期的木都風華。"
+                },
+                fenqihu: {
+                    title: "奮起湖車站",
+                    tag: "阿里山林鐵中繼站",
+                    loc: "嘉義縣竹崎鄉",
+                    desc: "海拔1,403公尺的高山車站，蒸汽火車在此加水補充煤炭，孕育出馳名的鐵路便當文化。"
+                },
+                baoan: {
+                    title: "保安車站",
+                    tag: "永保安康發源地",
+                    loc: "臺南市仁德區",
+                    desc: "古樸典雅的日式檜木車站，因與永康車站連成『永保安康』車票而名聞遐邇。"
+                }
+            };
+
+            const mapNodes = document.querySelectorAll('.map-node');
+            mapNodes.forEach(node => {
+                node.addEventListener('click', () => {
+                    const key = node.getAttribute('data-station');
+                    const info = stationData[key];
+                    if(info) {
+                        const box = document.getElementById('mapDetailBox');
+                        anime({
+                            targets: box,
+                            opacity: [0.3, 1],
+                            scale: [0.97, 1],
+                            duration: 400,
+                            easing: 'easeOutQuad'
+                        });
+                        document.getElementById('mapCardTitle').innerText = info.title;
+                        document.getElementById('mapCardTag').innerText = info.tag;
+                        document.getElementById('mapCardLoc').innerHTML = `<i class="fa-solid fa-location-dot mr-1"></i>${info.loc}`;
+                        document.getElementById('mapCardDesc').innerText = info.desc;
+                    }
+                });
+            });
+
+            // --- 4. STATION FILTERING & RE-LAYOUT ANIMATION ---
+            const filterBtns = document.querySelectorAll('.station-filter');
+            const stationCards = document.querySelectorAll('.station-card');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => {
+                        b.classList.remove('bg-railGold', 'text-railGreen', 'active-filter');
+                        b.classList.add('bg-railGreen/60', 'text-railPaper');
+                    });
+                    btn.classList.add('bg-railGold', 'text-railGreen', 'active-filter');
+
+                    const filter = btn.getAttribute('data-filter');
+
+                    stationCards.forEach(card => {
+                        const category = card.getAttribute('data-category');
+                        if (filter === 'all' || category === filter) {
+                            card.style.display = 'flex';
+                            anime({
+                                targets: card,
+                                scale: [0.9, 1],
+                                opacity: [0, 1],
+                                duration: 450,
+                                easing: 'easeOutQuad'
+                            });
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // --- 5. IMAGE COMPARISON SLIDER SLIDE/HOVER ---
+            const sliders = document.querySelectorAll('.img-comp-container');
+            sliders.forEach(container => {
+                const overlay = container.querySelector('.img-comp-overlay');
+
+                const moveSlider = (x) => {
+                    const rect = container.getBoundingClientRect();
+                    let pos = ((x - rect.left) / rect.width) * 100;
+                    if (pos < 5) pos = 5;
+                    if (pos > 95) pos = 95;
+                    overlay.style.width = pos + '%';
+                };
+
+                container.addEventListener('mousemove', (e) => moveSlider(e.clientX));
+                container.addEventListener('touchmove', (e) => {
+                    if (e.touches[0]) moveSlider(e.touches[0].clientX);
+                });
+            });
+
+            // --- 6. MODAL ZOOM & CLOSE ANIMATION ---
+            const modal = document.getElementById('stationModal');
+            const modalContainer = document.getElementById('modalContainer');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+
+            document.querySelectorAll('.open-modal-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('modalTitle').innerText = btn.getAttribute('data-title');
+                    document.getElementById('modalType').innerText = btn.getAttribute('data-type');
+                    document.getElementById('modalLocation').querySelector('span').innerText = btn.getAttribute('data-location');
+                    document.getElementById('modalDesc').innerText = btn.getAttribute('data-desc');
+                    document.getElementById('modalSvgText').textContent = btn.getAttribute('data-title');
+
+                    modal.classList.remove('hidden');
+                    anime({
+                        targets: modalContainer,
+                        scale: [0.85, 1],
+                        opacity: [0, 1],
+                        duration: 400,
+                        easing: 'easeOutCubic'
+                    });
+                });
+            });
+
+            const closeModal = () => {
+                anime({
+                    targets: modalContainer,
+                    scale: [1, 0.85],
+                    opacity: [1, 0],
+                    duration: 300,
+                    easing: 'easeInCubic',
+                    complete: () => modal.classList.add('hidden')
+                });
+            };
+
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+            // --- 7. ARTIFACTS STORY MODAL TRIGGER ---
+            document.querySelectorAll('.artifact-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const type = card.getAttribute('data-artifact');
+                    let title = "微物件歷史記憶";
+                    let desc = "點擊微物件可窺見舊時代鐵道生活的點滴細節。";
+
+                    if(type === 'ticket' || type === 'ticket2') {
+                        title = "硬頁木刻名片式車票 (Edmondson Ticket)";
+                        desc = "名片式車票（又稱硬票）由托馬斯•愛蒙森於1830年代發明。臺灣鐵路局長年採用特製硬紙板印製，並以軋日機蓋印日期。其堅硬質感與『追分成功』、『永保安康』等吉祥組合，成為珍貴收藏。";
+                    } else if(type === 'bento') {
+                        title = "台鐵懷舊鐵盒排骨便當";
+                        desc = "月台便當販售員手提木箱呼喊『便當、便當』是月台經典光景。圓形雙層不鏽鋼便當盒透出濃郁滷排骨香味，陪伴了無數歸鄉與出外打拚的旅人。";
+                    } else if(type === 'ct273badge') {
+                        title = "CT273 蒸汽機車車號銘牌";
+                        desc = "CT273 蒸汽機車於1942年由日本川崎重工製造，戰後為臺鐵幹線客運的主力機車。這塊漆上鐵路紅的銅質銘牌，象徵著臺灣鐵道工業與修護文化遺產的驕傲。";
+                    }
+
+                    document.getElementById('modalTitle').innerText = title;
+                    document.getElementById('modalType').innerText = "庶民與工業遺產物件";
+                    document.getElementById('modalLocation').querySelector('span').innerText = "國家鐵道博物館與歷史館藏";
+                    document.getElementById('modalDesc').innerText = desc;
+                    document.getElementById('modalSvgText').textContent = title;
+
+                    modal.classList.remove('hidden');
+                    anime({
+                        targets: modalContainer,
+                        scale: [0.85, 1],
+                        opacity: [0, 1],
+                        duration: 400,
+                        easing: 'easeOutCubic'
+                    });
+                });
+            });
+
+            // --- 8. AUDIO SYNTHESIZER TOGGLE ---
+            let audioActive = false;
+            const audioToggle = document.getElementById('audioToggle');
+            const audioIcon = document.getElementById('audioIcon');
+            const audioText = document.getElementById('audioText');
+
+            audioToggle.addEventListener('click', () => {
+                audioActive = !audioActive;
+                if (audioActive) {
+                    audioIcon.className = "fa-solid fa-volume-high text-railGold";
+                    if(audioText) audioText.innerText = "車廂環境音：開";
+                    audioToggle.classList.remove('opacity-60');
+                } else {
+                    audioIcon.className = "fa-solid fa-volume-xmark opacity-50";
+                    if(audioText) audioText.innerText = "車廂環境音：關";
+                    audioToggle.classList.add('opacity-60');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
